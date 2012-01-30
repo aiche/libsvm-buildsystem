@@ -49,3 +49,7 @@ foreach(i ${svm_executables})
   ## link executables against OpenMS
   target_link_libraries(${i} libsvm)
 endforeach(i)
+
+if(SVM_TOY_QT)
+  add_subdirectory(svm-toy/qt/)
+endif(SVM_TOY_QT) 
