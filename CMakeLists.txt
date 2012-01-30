@@ -53,3 +53,7 @@ endforeach(i)
 if(SVM_TOY_QT)
   add_subdirectory(svm-toy/qt/)
 endif(SVM_TOY_QT) 
+
+if(SVM_TOY_GTK)
+  add_subdirectory(svm-toy/gtk/)
+endif(SVM_TOY_GTK)
