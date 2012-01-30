@@ -5,28 +5,23 @@ cmake_minimum_required(VERSION 2.6)
 set(LIBSVM_MAJOR_VERSION "3")
 set(LIBSVM_MINOR_VERSION "11")
 
-## list all your executables here (a corresponding .c file should exist)
-set(svm_executables
-	svm-predict
-	svm-train
-	svm-scale
-)
-
 ## all these classes will be linked into a library
 set(svm_sources
-	svm.cpp
+	source/svm.cpp
 )
 
 ## add def file for windows library construction
 if(MSVC)
   set(svm_sources 
     ${svm_sources} 
-    svm.def)
+  	source/svm.def)
 endif(MSVC)
 
 # set pathes
 set( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib )
 set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
+
+include_directories(${PROJECT_SOURCE_DIR}/include)
 
 if(BUILD_STATIC)
   add_library(libsvm STATIC ${svm_sources})
@@ -42,8 +37,15 @@ set_target_properties(libsvm PROPERTIES
   VERSION "${LIBSVM_MAJOR_VERSION}.${LIBSVM_MINOR_VERSION}"
   SOVERSION "${LIBSVM_MAJOR_VERSION}.${LIBSVM_MINOR_VERSION}")
 
+## list all your executables here (a corresponding .c file should exist)
+set(svm_executables
+	svm-predict
+	svm-train
+	svm-scale
+)
+
 foreach(i ${svm_executables})
-  add_executable(${i} ${i}.c)
+  add_executable(${i} apps/${i}.c)
   ## link executables against OpenMS
   target_link_libraries(${i} libsvm)
 endforeach(i)

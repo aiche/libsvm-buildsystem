@@ -3,7 +3,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
-#include "svm.h"
+
+#include <libsvm/svm.h>
+
 #define Malloc(type,n) (type *)malloc((n)*sizeof(type))
 
 void print_null(const char *s) {}

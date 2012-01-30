@@ -3,7 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include "svm.h"
+
+#include <libsvm/svm.h>
 
 struct svm_node *x;
 int max_nr_attr = 64;

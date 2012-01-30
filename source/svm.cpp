@@ -6,7 +6,9 @@
 #include <string.h>
 #include <stdarg.h>
 #include <limits.h>
-#include "svm.h"
+
+#include <libsvm/svm.h>
+
 int libsvm_version = LIBSVM_VERSION;
 typedef float Qfloat;
 typedef signed char schar;
