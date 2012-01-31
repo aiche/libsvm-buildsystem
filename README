@@ -119,7 +119,7 @@ svm-toy:
 	
 	or 
 	
-	> cmake -D SVM_TOY_GTK .
+	> cmake -D SVM_TOY_GTK=On .
 	
 	to enable building the respective examples.
 
