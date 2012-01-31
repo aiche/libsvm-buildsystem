@@ -1,4 +1,3 @@
-#include(UsePkgConfig)
 find_package(GTK2)
 
 if (GTK2_FOUND)

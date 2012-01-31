@@ -3,7 +3,9 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <list>
-#include "../../svm.h"
+
+#include <libsvm/svm.h>
+
 using namespace std;
 
 #define DEFAULT_PARAM "-t 2 -c 100"

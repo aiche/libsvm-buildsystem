@@ -15,11 +15,21 @@ if(MSVC)
   set(svm_sources 
     ${svm_sources} 
   	source/svm.def)
+		
+	# copied from old Makefilen.win
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -nologo -I. -D __WIN32__ -D _CRT_SECURE_NO_DEPRECATE")
 endif(MSVC)
 
 # set pathes
-set( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib )
 set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
+
+# in case of windows we put everything in the same directory so it works
+# out of the box, for linux/mac we do it the classical unix way bin/lib/..
+if(MSVC)
+	set( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
+else()
+	set( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib )
+endif()
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
@@ -63,6 +73,10 @@ endif(SVM_TOY_QT)
 if(SVM_TOY_GTK)
   add_subdirectory(svm-toy/gtk/)
 endif(SVM_TOY_GTK)
+
+if(MSVC)
+	add_subdirectory(svm-toy/windows)
+endif(MSVC)
 
 ################### install target ###################
 
