@@ -1,5 +1,5 @@
 project("libSVM")
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 
 # libsvm version settings
 set(LIBSVM_MAJOR_VERSION "3")
@@ -23,6 +23,8 @@ set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
+#################### svm library #####################
+
 if(BUILD_STATIC)
   add_library(libsvm STATIC ${svm_sources})
 else()
@@ -37,6 +39,8 @@ set_target_properties(libsvm PROPERTIES
   VERSION "${LIBSVM_MAJOR_VERSION}.${LIBSVM_MINOR_VERSION}"
   SOVERSION "${LIBSVM_MAJOR_VERSION}.${LIBSVM_MINOR_VERSION}")
 
+################## svm executables ###################
+
 ## list all your executables here (a corresponding .c file should exist)
 set(svm_executables
 	svm-predict
@@ -50,6 +54,8 @@ foreach(i ${svm_executables})
   target_link_libraries(${i} libsvm)
 endforeach(i)
 
+################## svm toy examples ##################
+
 if(SVM_TOY_QT)
   add_subdirectory(svm-toy/qt/)
 endif(SVM_TOY_QT) 
@@ -58,10 +64,10 @@ if(SVM_TOY_GTK)
   add_subdirectory(svm-toy/gtk/)
 endif(SVM_TOY_GTK)
 
-## install target
+################### install target ###################
 
 # install header
-install(FILES include/libsvm/svm.h DESTINATION include/libsvm/svm.h)
+install(DIRECTORY include/ DESTINATION include )
 
 # install lib and executables
 install(TARGETS libsvm ${svm_executables}
