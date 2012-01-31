@@ -57,3 +57,17 @@ endif(SVM_TOY_QT)
 if(SVM_TOY_GTK)
   add_subdirectory(svm-toy/gtk/)
 endif(SVM_TOY_GTK)
+
+## install target
+
+# install header
+install(FILES include/libsvm/svm.h DESTINATION include/libsvm/svm.h)
+
+# install lib and executables
+install(TARGETS libsvm ${svm_executables}
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+)
+
+
