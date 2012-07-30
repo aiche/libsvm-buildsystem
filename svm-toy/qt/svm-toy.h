@@ -1,6 +1,7 @@
 #include <QtGui>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 #include <list>
 
@@ -47,49 +48,56 @@ private:
 	QPushButton button_load;
 	QLineEdit input_line;
 	QPainter buffer_painter;
+
 	struct point {
 		double x, y;
 		signed char value;
 	};
+
 	list<point> point_list;
 	int current_value;
+
 	const QPixmap& choose_icon(int v)
 	{
 		if(v==1) return icon1;
 		else if(v==2) return icon2;
 		else return icon3;
 	}
+
 	void clear_all()
 	{
 		point_list.clear();
 		buffer.fill(Qt::black);
 		repaint();
 	}
+
 	void draw_point(const point& p)
 	{
 		const QPixmap& icon = choose_icon(p.value);
 		buffer_painter.drawPixmap((int)(p.x*XLEN),(int)(p.y*YLEN),icon);
 		repaint();
 	}
+
 	void draw_all_points()
 	{
 		for(list<point>::iterator p = point_list.begin(); p != point_list.end();p++)
-			draw_point(*p);	
+			draw_point(*p);
 	}
-private slots: 
+private slots:
 	void button_change_icon_clicked()
 	{
 		++current_value;
 		if(current_value > 3) current_value = 1;
 		button_change_icon.setIcon(choose_icon(current_value));
 	}
+
 	void button_run_clicked()
 	{
 		// guard
 		if(point_list.empty()) return;
 
 		svm_parameter param;
-		int i,j;	
+		int i,j;
 
 		// default values
 		param.svm_type = C_SVC;
@@ -166,7 +174,7 @@ private slots:
 					break;
 			}
 		}
-	
+
 		// build problem
 		svm_problem prob;
 
@@ -205,7 +213,7 @@ private slots:
 				x[0].value = (double) i / XLEN;
 				j[i] = (int)(YLEN*svm_predict(model, x));
 			}
-			
+
 			buffer_painter.setPen(colors[0]);
 			buffer_painter.drawLine(0,0,0,YLEN-1);
 
@@ -214,10 +222,10 @@ private slots:
 			{
 				buffer_painter.setPen(colors[0]);
 				buffer_painter.drawLine(i,0,i,YLEN-1);
-			
+
 				buffer_painter.setPen(colors[5]);
 				buffer_painter.drawLine(i-1,j[i-1],i,j[i]);
-				
+
 				if(param.svm_type == EPSILON_SVR)
 				{
 					buffer_painter.setPen(colors[2]);
@@ -278,20 +286,37 @@ private slots:
 		free(param.weight);
 		draw_all_points();
 	}
+
 	void button_clear_clicked()
 	{
 		clear_all();
 	}
+
 	void button_save_clicked()
 	{
 		QString filename = QFileDialog::getSaveFileName();
 		if(!filename.isNull())
 		{
 			FILE *fp = fopen(filename.toAscii().constData(),"w");
+
+			const char *p = input_line.text().toAscii().constData();
+			const char* svm_type_str = strstr(p, "-s ");
+			int svm_type = C_SVC;
+			if(svm_type_str != NULL)
+				sscanf(svm_type_str, "-s %d", &svm_type);
+
 			if(fp)
 			{
-				for(list<point>::iterator p = point_list.begin(); p != point_list.end();p++)
-					fprintf(fp,"%d 1:%f 2:%f\n", p->value, p->x, p->y);
+				if(svm_type == EPSILON_SVR || svm_type == NU_SVR)
+				{
+					for(list<point>::iterator p = point_list.begin(); p != point_list.end();p++)
+						fprintf(fp,"%f 1:%f\n", p->y, p->x);
+				}
+				else
+				{
+					for(list<point>::iterator p = point_list.begin(); p != point_list.end();p++)
+						fprintf(fp,"%d 1:%f 2:%f\n", p->value, p->x, p->y);
+				}
 				fclose(fp);
 			}
 		}
@@ -310,15 +335,22 @@ private slots:
 				{
 					int v;
 					double x,y;
-					if(sscanf(buf,"%d%*d:%lf%*d:%lf",&v,&x,&y)!=3)
-						break;													
-					point p = {x,y,v};
-					point_list.push_back(p);
+					if(sscanf(buf,"%d%*d:%lf%*d:%lf",&v,&x,&y)==3)
+					{
+						point p = {x,y,v};
+						point_list.push_back(p);
+					}
+					else if(sscanf(buf,"%lf%*d:%lf",&y,&x)==2)
+					{
+						point p = {x,y,current_value};
+						point_list.push_back(p);
+					}
+					else
+						break;
 				}
 				fclose(fp);
 				draw_all_points();
-			}				
+			}
 		}
-		
-	}
+  }
 };
