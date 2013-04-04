@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 
 # libsvm version settings
 set(LIBSVM_MAJOR_VERSION "3")
-set(LIBSVM_MINOR_VERSION "11")
+set(LIBSVM_MINOR_VERSION "17")
 
 ## all these classes will be linked into a library
 set(svm_sources
