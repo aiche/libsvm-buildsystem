@@ -25,11 +25,11 @@ void exit_with_help()
 	"Usage: model = svmtrain(training_label_vector, training_instance_matrix, 'libsvm_options');\n"
 	"libsvm_options:\n"
 	"-s svm_type : set type of SVM (default 0)\n"
-	"	0 -- C-SVC\n"
-	"	1 -- nu-SVC\n"
+	"	0 -- C-SVC		(multi-class classification)\n"
+	"	1 -- nu-SVC		(multi-class classification)\n"
 	"	2 -- one-class SVM\n"
-	"	3 -- epsilon-SVR\n"
-	"	4 -- nu-SVR\n"
+	"	3 -- epsilon-SVR	(regression)\n"
+	"	4 -- nu-SVR		(regression)\n"
 	"-t kernel_type : set type of kernel function (default 2)\n"
 	"	0 -- linear: u'*v\n"
 	"	1 -- polynomial: (gamma*u'*v + coef0)^degree\n"
@@ -368,9 +368,11 @@ int read_problem_sparse(const mxArray *label_vec, const mxArray *instance_mat)
 	return 0;
 }
 
-static void fake_answer(mxArray *plhs[])
+static void fake_answer(int nlhs, mxArray *plhs[])
 {
-	plhs[0] = mxCreateDoubleMatrix(0, 0, mxREAL);
+	int i;
+	for(i=0;i<nlhs;i++)
+		plhs[i] = mxCreateDoubleMatrix(0, 0, mxREAL);
 }
 
 // Interface function of matlab
@@ -384,6 +386,13 @@ void mexFunction( int nlhs, mxArray *plhs[],
 	// (for cross validation and probability estimation)
 	srand(1);
 
+	if(nlhs > 1)
+	{
+		exit_with_help();
+		fake_answer(nlhs, plhs);
+		return;
+	}
+
 	// Transform the input Matrix to libsvm format
 	if(nrhs > 1 && nrhs < 4)
 	{
@@ -391,7 +400,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
 
 		if(!mxIsDouble(prhs[0]) || !mxIsDouble(prhs[1])) {
 			mexPrintf("Error: label vector and instance matrix must be double\n");
-			fake_answer(plhs);
+			fake_answer(nlhs, plhs);
 			return;
 		}
 
@@ -399,7 +408,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
 		{
 			exit_with_help();
 			svm_destroy_param(&param);
-			fake_answer(plhs);
+			fake_answer(nlhs, plhs);
 			return;
 		}
 
@@ -415,7 +424,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
 				{
 					mexPrintf("Error: cannot generate a full training instance matrix\n");
 					svm_destroy_param(&param);
-					fake_answer(plhs);
+					fake_answer(nlhs, plhs);
 					return;
 				}
 				err = read_problem_dense(prhs[0], lhs[0]);
@@ -439,7 +448,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
 			free(prob.y);
 			free(prob.x);
 			free(x_space);
-			fake_answer(plhs);
+			fake_answer(nlhs, plhs);
 			return;
 		}
 
@@ -468,7 +477,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
 	else
 	{
 		exit_with_help();
-		fake_answer(plhs);
+		fake_answer(nlhs, plhs);
 		return;
 	}
 }

@@ -2,6 +2,7 @@
 
 
 
+
 package libsvm;
 import java.io.*;
 import java.util.*;
@@ -639,7 +640,7 @@ class Solver {
 				active_size = l;
 				svm.info("*");
 			}
-			svm.info("\nWARNING: reaching max number of iterations");
+			System.err.print("\nWARNING: reaching max number of iterations\n");
 		}
 
 		// calculate rho
@@ -1292,7 +1293,7 @@ public class svm {
 	//
 	// construct and solve various formulations
 	//
-	public static final int LIBSVM_VERSION=312; 
+	public static final int LIBSVM_VERSION=317; 
 	public static final Random rand = new Random();
 
 	private static svm_print_interface svm_print_stdout = new svm_print_interface()
@@ -1891,6 +1892,24 @@ public class svm {
 			}
 		}
 
+		//
+		// Labels are ordered by their first occurrence in the training set. 
+		// However, for two-class sets with -1/+1 labels and -1 appears first, 
+		// we swap labels to ensure that internally the binary SVM has positive data corresponding to the +1 instances.
+		//
+		if (nr_class == 2 && label[0] == -1 && label[1] == +1)
+		{
+			do {int _=label[0]; label[0]=label[1]; label[1]=_;} while(false);
+			do {int _=count[0]; count[0]=count[1]; count[1]=_;} while(false);
+			for(i=0;i<l;i++)
+			{
+				if(data_label[i] == 0)
+					data_label[i] = 1;
+				else
+					data_label[i] = 0;
+			}
+		}
+
 		int[] start = new int[nr_class];
 		start[0] = 0;
 		for(i=1;i<nr_class;i++)
@@ -1948,12 +1967,14 @@ public class svm {
 			model.l = nSV;
 			model.SV = new svm_node[nSV][];
 			model.sv_coef[0] = new double[nSV];
+			model.sv_indices = new int[nSV];
 			int j = 0;
 			for(i=0;i<prob.l;i++)
 				if(Math.abs(f.alpha[i]) > 0)
 				{
 					model.SV[j] = prob.x[i];
 					model.sv_coef[0][j] = f.alpha[i];
+					model.sv_indices[j] = i+1;
 					++j;
 				}
 		}
@@ -2101,9 +2122,14 @@ public class svm {
 
 			model.l = nnz;
 			model.SV = new svm_node[nnz][];
+			model.sv_indices = new int[nnz];
 			p = 0;
 			for(i=0;i<l;i++)
-				if(nonzero[i]) model.SV[p++] = x[i];
+				if(nonzero[i])
+				{
+					model.SV[p] = x[i];
+					model.sv_indices[p++] = perm[i] + 1;
+				}
 
 			int[] nz_start = new int[nr_class];
 			nz_start[0] = 0;
@@ -2268,6 +2294,18 @@ public class svm {
 		if (model.label != null)
 			for(int i=0;i<model.nr_class;i++)
 				label[i] = model.label[i];
+	}
+
+	public static void svm_get_sv_indices(svm_model model, int[] indices)
+	{
+		if (model.sv_indices != null)
+			for(int i=0;i<model.l;i++)
+				indices[i] = model.sv_indices[i];
+	}
+
+	public static int svm_get_nr_sv(svm_model model)
+	{
+		return model.l;
 	}
 
 	public static double svm_get_svr_probability(svm_model model)
