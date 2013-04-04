@@ -9,10 +9,10 @@
 <a name="_TOP"><b><h1><a
 href=http://www.csie.ntu.edu.tw/~cjlin/libsvm>LIBSVM</a>  FAQ </h1></b></a>
 <b>last modified : </b>
-Thu,  1 Mar 2012 14:45:34 GMT
+Wed, 19 Dec 2012 13:26:34 GMT
 <class="categories">
 <li><a
-href="#_TOP">All Questions</a>(77)</li>
+href="#_TOP">All Questions</a>(78)</li>
 <ul><b>
 <li><a
 href="#/Q1:_Some_sample_uses_of_libsvm">Q1:_Some_sample_uses_of_libsvm</a>(2)</li>
@@ -21,7 +21,7 @@ href="#/Q2:_Installation_and_running_the_program">Q2:_Installation_and_running_t
 <li><a
 href="#/Q3:_Data_preparation">Q3:_Data_preparation</a>(7)</li>
 <li><a
-href="#/Q4:_Training_and_prediction">Q4:_Training_and_prediction</a>(33)</li>
+href="#/Q4:_Training_and_prediction">Q4:_Training_and_prediction</a>(34)</li>
 <li><a
 href="#/Q5:_Probability_outputs">Q5:_Probability_outputs</a>(3)</li>
 <li><a
@@ -78,7 +78,8 @@ href="#/Q9:_MATLAB_interface">Q9:_MATLAB_interface</a>(11)</li>
 <li class="headlines_item"><a href="#f416">On 32-bit machines, if I use a large cache (i.e. large -m) on a linux machine, why sometimes I get "segmentation fault ?"</a></li>
 <li class="headlines_item"><a href="#f417">How do I disable screen output of svm-train?</a></li>
 <li class="headlines_item"><a href="#f418">I would like to use my own kernel. Any example? In svm.cpp, there are two subroutines for kernel evaluations: k_function() and kernel_function(). Which one should I modify ?</a></li>
-<li class="headlines_item"><a href="#f419">What method does libsvm use for multi-class SVM ? Why don't you use the "1-against-the rest" method ?</a></li>
+<li class="headlines_item"><a href="#f419">What method does libsvm use for multi-class SVM ? Why don't you use the "1-against-the rest" method?</a></li>
+<li class="headlines_item"><a href="#f4191">How does LIBSVM perform parameter selection for multi-class problems? </a></li>
 <li class="headlines_item"><a href="#f420">After doing cross validation, why there is no model file outputted ?</a></li>
 <li class="headlines_item"><a href="#f4201">Why my cross-validation results are different from those in the Practical Guide?</a></li>
 <li class="headlines_item"><a href="#f421">On some systems CV accuracy is the same in several runs. How could I use different data partitions? In other words, how do I set random seed in LIBSVM?</a></li>
@@ -408,7 +409,7 @@ The warning message is like
 <pre>
 svm.cpp:2730: warning: ignoring return value of int fscanf(FILE*, const char*, ...), declared with attribute warn_unused_result
 </pre>
-This is not a problem; see <a href=https://wiki.ubuntu.com/CompilerFlags#-D_FORTIFY_SOURCE=2>for more 
+This is not a problem; see <a href=https://wiki.ubuntu.com/CompilerFlags#-D_FORTIFY_SOURCE=2>this page</a> for more 
 details of ubuntu systems.
 In the future we may modify the code
 so that these messages do not appear.
@@ -1069,7 +1070,7 @@ subroutines by replacing any kernel.
 <a href="#_TOP">[Go Top]</a>  
 <hr/>
   <a name="/Q4:_Training_and_prediction"></a>
-<a name="f419"><b>Q: What method does libsvm use for multi-class SVM ? Why don't you use the "1-against-the rest" method ?</b></a>
+<a name="f419"><b>Q: What method does libsvm use for multi-class SVM ? Why don't you use the "1-against-the rest" method?</b></a>
 <br/>                                                                                
 <p>
 It is one-against-one. We chose it after doing the following
@@ -1085,6 +1086,48 @@ for multi-class support vector machines
 "1-against-the rest" is a good method whose performance
 is comparable to "1-against-1." We do the latter
 simply because its training time is shorter.
+<p align="right">
+<a href="#_TOP">[Go Top]</a>  
+<hr/>
+  <a name="/Q4:_Training_and_prediction"></a>
+<a name="f4191"><b>Q: How does LIBSVM perform parameter selection for multi-class problems? </b></a>
+<br/>                                                                                
+
+<p>
+LIBSVM implements "one-against-one" multi-class method, so there are 
+k(k-1)/2 binary models, where k is the number of classes.
+
+<p>
+We can consider two ways to conduct parameter selection.
+
+<ol>
+<li>
+For any two classes of data, a parameter selection procedure is conducted. Finally,
+each decision function has its own optimal parameters.
+</li>
+<li>
+The same parameters are used for all k(k-1)/2 binary classification problems.
+We select parameters that achieve the highest overall performance.
+</li>
+</ol>
+
+Each has its own advantages. A
+single parameter set may not be uniformly good for all k(k-1)/2 decision functions.
+However, as the overall accuracy is the final consideration, one parameter set 
+for one decision function may lead to over-fitting. In the paper
+<p>
+Chen, Lin, and Sch&ouml;lkopf,
+<A HREF="../papers/nusvmtutorial.pdf">
+A tutorial on nu-support vector machines.
+</A> 
+Applied Stochastic Models in Business and Industry, 21(2005), 111-136,
+
+<p>
+they have experimentally
+shown that the two methods give similar performance.
+Therefore, currently the parameter selection in LIBSVM
+takes the second approach by considering the same parameters for
+all k(k-1)/2 models.
 <p align="right">
 <a href="#_TOP">[Go Top]</a>  
 <hr/>
@@ -1141,6 +1184,10 @@ in mid 2011), you can add
 svm.rand.setSeed(0);
 </pre>
 in the main() function of svm_train.java.
+
+<p>
+If you use CV to select parameters, it is recommended to use identical folds
+under different parameters. In this case, you can consider fixing the seed.
 <p align="right">
 <a href="#_TOP">[Go Top]</a>  
 <hr/>
@@ -1363,32 +1410,26 @@ $(CXX) -lgomp -shared -dynamiclib svm.o -o libsvm.so.$(SHVER)
 <br/>                                                                                
 
 <p>
-It's very simple. Please replace 
+It's very simple. Since version 3.13, you can use the function
 <pre>
-			if(nonzero[i]) model->SV[p++] = x[i];
+void svm_get_sv_indices(const struct svm_model *model, int *sv_indices)
 </pre>
-in svm_train() of svm.cpp with
+to get indices of support vectors. For example, in svm-train.c, after
 <pre>
-			if(nonzero[i]) 
-			{
-				model->SV[p++] = x[i];
-				info("%d\n", perm[i]);
-			}
+		model = svm_train(&amp;prob, &amp;param);
 </pre>
-If there are many requests, we may
-provide a function to return indices
-of support vectors. In the mean time,
-if you need such information in your code,
-you can add the array nonzero to the model
-structure. This array has the same size as
-the number of data, so alternatively you can
-store only indices of support vectors.
+you can add
+<pre>
+		int nr_sv = svm_get_nr_sv(model);
+		int *sv_indices = Malloc(int, nr_sv);
+		svm_get_sv_indices(model, sv_indices);
+		for (int i=0; i&lt;nr_sv; i++)
+			printf("instance %d is a support vector\n", sv_indices[i]);
+</pre>
 
-<p> If you use matlab interface, you can easily
-compare support vectors and training data to know
-the indices:
+<p> If you use matlab interface, you can directly check
 <pre>
-[tmp index]=ismember(model.SVs, training_data,'rows');
+model.sv_indices
 </pre>
 <p align="right">
 <a href="#_TOP">[Go Top]</a>  
@@ -1811,11 +1852,11 @@ because rho is arranged by 1vs2 1vs3 2vs3.
 <br/>                                                                                
 <p>
 Yes, after libsvm 2.86, the matlab interface
-works on OCTAVE as well. Please type
+works on OCTAVE as well. Please use make.m by typing
 <pre>
-make octave
+>> make 
 </pre>
-for installation.
+under OCTAVE.
 <p align="right">
 <a href="#_TOP">[Go Top]</a>  
 <hr/>
