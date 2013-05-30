@@ -1,24 +1,22 @@
-find_package(GTK2)
+## LibSVM cmake build system
+## svm-toy/gtk sub-folder
 
-if (GTK2_FOUND)
+project (LIBSVM_svm_toy_gtk)
+cmake_minimum_required (VERSION 2.8)
 
-  set(sources
-    main.c
-    interface.c
-    callbacks.cpp
-  )
+find_package(GTK2 REQUIRED)
 
-  set_source_files_properties(main.c PROPERTIES LANGUAGE C )
-  set_source_files_properties(interface.c PROPERTIES LANGUAGE C )
+set(sources
+  main.c
+  interface.c
+  callbacks.cpp
+)
 
-  include_directories(${GTK2_INCLUDE_DIRS})
-  # link_directories (${GTK2_LIBRARIES})
-  
-  add_executable(svm-toy ${sources})
-  
-  add_definitions (${GTK2_CFLAGS_OTHER})
-  target_link_libraries (svm-toy libsvm ${GTK2_LIBRARIES})
+set_source_files_properties(main.c PROPERTIES LANGUAGE C )
+set_source_files_properties(interface.c PROPERTIES LANGUAGE C )
 
-else()
-  message(STATUS "Cannot find GTK")
-endif (GTK2_FOUND)
+include_directories(${GTK2_INCLUDE_DIRS})
+add_executable(svm-toy ${sources})
+
+add_definitions (${GTK2_CFLAGS_OTHER})
+target_link_libraries (svm-toy libsvm ${GTK2_LIBRARIES})

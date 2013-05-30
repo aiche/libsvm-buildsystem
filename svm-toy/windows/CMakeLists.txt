@@ -1,3 +1,9 @@
+## LibSVM cmake build system
+## svm-toy/windows sub-folder
+
+project (LIBSVM_svm_toy_win)
+cmake_minimum_required (VERSION 2.8)
+
 set(sources
   svm-toy.cpp
 )
