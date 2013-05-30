@@ -4,14 +4,6 @@
 project(LIBSVM_lib)
 cmake_minimum_required(VERSION 2.8)
 
-# in case of windows we put everything in the same directory so it works
-# out of the box, for linux/mac we do it the classical unix way bin/lib/..
-if(MSVC)
-	set( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../bin )
-else()
-	set( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../lib )
-endif()
-
 ## all these classes will be linked into a library
 set(svm_sources
 	../source/svm.cpp
@@ -45,3 +37,9 @@ install(TARGETS libsvm libsvm_static
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
 )
+
+# if MSVC we want the dll to be also in the lib-folder
+# for linking against libsvm
+if (MSVC)
+	install(TARGETS libsvm libsvm_static DESTINATION lib	)
+endif (MSVC)
