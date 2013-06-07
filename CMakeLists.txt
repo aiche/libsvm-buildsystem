@@ -4,10 +4,15 @@
 project(LIBSVM)
 cmake_minimum_required(VERSION 2.8)
 
+if(NOT DEFINED BUILD_SHARED_LIBS)
+    option(BUILD_SHARED_LIBS "Build LIBSVM as a shared library" ON)
+endif()
+
 # libsvm version settings
 set(LIBSVM_MAJOR_VERSION "3")
 set(LIBSVM_MINOR_VERSION "17")
 
+# global definition of output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
