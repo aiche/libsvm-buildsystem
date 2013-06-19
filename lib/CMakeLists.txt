@@ -18,19 +18,15 @@ endif(MSVC)
 set(CMAKE_DEBUG_POSTFIX d)
 
 ## svm library
-if (BUILD_SHARED_LIBS)
-	add_library(libsvm SHARED ${svm_sources})
-	# set version for embedding in the SO/DYLIB
-	set_target_properties(libsvm PROPERTIES 
-		VERSION "${LIBSVM_MAJOR_VERSION}.${LIBSVM_MINOR_VERSION}"
-		SOVERSION "${LIBSVM_MAJOR_VERSION}.${LIBSVM_MINOR_VERSION}")
-else()
-	add_library(libsvm STATIC ${svm_sources})
-endif (BUILD_SHARED_LIBS)
+add_library(libsvm ${svm_sources})
+# set version for embedding in the SO/DYLIB
+set_target_properties(libsvm PROPERTIES 
+	VERSION "${LIBSVM_MAJOR_VERSION}.${LIBSVM_MINOR_VERSION}"
+	SOVERSION "${LIBSVM_MAJOR_VERSION}.${LIBSVM_MINOR_VERSION}")
 
 # remove default prefix of cmake, since our target is already named libsvm
 set_target_properties(libsvm PROPERTIES PREFIX "")
-  
+
 # install lib
 install(TARGETS libsvm
   RUNTIME DESTINATION bin
